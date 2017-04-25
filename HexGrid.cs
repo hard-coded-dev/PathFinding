@@ -133,3 +133,41 @@ public class Offset
         return Hex.GetRotation( from.GetHex(), to.GetHex() );
     }
 }
+
+
+public class HexSearchNode : IEquatable<HexSearchNode>
+{
+    public Offset Pos { get; set; }
+    public int Rotation { get; set; }
+    public int CostSoFar { get; set; }
+    public int CostToEnd { get; set; }
+    public HexSearchNode Parent { get; set; }
+
+    public HexSearchNode( Offset pos, int rotation, int costFrom, int costEnd )
+    {
+        Pos = pos;
+        Rotation = rotation;
+        CostSoFar = costFrom;
+        CostToEnd = costEnd;
+    }
+
+    public override bool Equals( object obj )
+    {
+        return Equals( obj as HexSearchNode );
+    }
+
+    public bool Equals( HexSearchNode other )
+    {
+        return ( other.Pos.Equals( Pos ) );
+    }
+
+    public override int GetHashCode()
+    {
+        return Pos.row ^ Pos.col;
+    }
+
+    public override string ToString()
+    {
+        return "[" + Pos.row + " " + Pos.col + " : " + ( CostSoFar + CostToEnd ) + "]";
+    }
+};
