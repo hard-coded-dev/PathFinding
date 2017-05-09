@@ -1,6 +1,6 @@
 using System;
 
-public class Hex
+public class Hexagonal
 {
     public int x;
     public int y;
@@ -12,7 +12,7 @@ public class Hex
 		new int[,] { {+1,  0}, {+1, -1}, { 0, -1}, {-1,  0}, { 0, +1}, {+1, +1} } };	// for odd line
 
 
-    public Hex( int _x, int _y, int _z )
+    public Hexagonal( int _x, int _y, int _z )
     {
         x = _x;
         y = _y;
@@ -27,22 +27,22 @@ public class Hex
         return new Offset( row, col );
     }
 
-    public int GetDistance( Hex other )
+    public int GetDistance( Hexagonal other )
     {
         return ( Math.Abs( other.x - x ) + Math.Abs( other.y - y ) + Math.Abs( other.z - z ) ) / 2;
     }
 
-    public static int GetDistance( Hex a, Hex b )
+    public static int GetDistance( Hexagonal a, Hexagonal b )
     {
         return ( Math.Abs( a.x - b.x ) + Math.Abs( a.y - b.y ) + Math.Abs( a.z - b.z ) ) / 2;
     }
 
-    static Hex[] rotations = new Hex[6] {
-       new Hex( +1, -1, 0 ), new Hex( +1, 0, -1 ), new Hex( 0, +1, -1 ),
-       new Hex( -1, +1, 0 ), new Hex( -1, 0, +1 ), new Hex( 0, -1, +1 )
+    static Hexagonal[] rotations = new Hexagonal[6] {
+       new Hexagonal( +1, -1, 0 ), new Hexagonal( +1, 0, -1 ), new Hexagonal( 0, +1, -1 ),
+       new Hexagonal( -1, +1, 0 ), new Hexagonal( -1, 0, +1 ), new Hexagonal( 0, -1, +1 )
     };
 
-    public static int GetRotation( Hex from, Hex to )
+    public static int GetRotation( Hexagonal from, Hexagonal to )
     {
         int x = to.x - from.x;
         int y = to.y - from.y;
@@ -78,34 +78,34 @@ public class Offset
     }
 
     // convert odd-r offset to cube
-    public Hex GetHex()
+    public Hexagonal GetHex()
     {
         int x = col - ( row - ( row & 1 ) ) / 2;
         int z = row;
         int y = -x - z;
-        return new Hex( x, y, z );
+        return new Hexagonal( x, y, z );
     }
 
-    static Hex GetHex( Offset other )
+    static Hexagonal GetHex( Offset other )
     {
         int x = other.col - ( other.row - ( other.row & 1 ) ) / 2;
         int z = other.row;
         int y = -x - z;
-        return new Hex( x, y, z );
+        return new Hexagonal( x, y, z );
     }
 
     public int GetDistance( Offset other )
     {
-        Hex a = GetHex();
-        Hex b = Offset.GetHex( other );
-        return Hex.GetDistance( a, b );
+        Hexagonal a = GetHex();
+        Hexagonal b = Offset.GetHex( other );
+        return Hexagonal.GetDistance( a, b );
     }
 
     public static int GetDistance( Offset a, Offset b )
     {
-        Hex ac = a.GetHex();
-        Hex bc = b.GetHex();
-        return Hex.GetDistance( ac, bc );
+        Hexagonal ac = a.GetHex();
+        Hexagonal bc = b.GetHex();
+        return Hexagonal.GetDistance( ac, bc );
     }
 
     public override bool Equals( object obj )
@@ -130,7 +130,7 @@ public class Offset
 
     public static int GetRotation( Offset from, Offset to )
     {
-        return Hex.GetRotation( from.GetHex(), to.GetHex() );
+        return Hexagonal.GetRotation( from.GetHex(), to.GetHex() );
     }
 }
 

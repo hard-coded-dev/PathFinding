@@ -1,26 +1,8 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
-public class GraphNode
-{
-    public GraphNode( int _id, int _cost, int _node1, int _node2 )
-    {
-        Id = _id;
-        Cost = _cost;
-        NextId1 = _node1;
-        NextId2 = _node2;
-    }
-    public int Id;
-    public int Cost;
-	// adjacent node's id
-    public int NextId1;
-    public int NextId2;
-    
-    public override string ToString()
-    {
-        return "[" + Id + " : " + Cost + "]";
-    }
-}
-
-public class PathFinding
+public partial class PathFinding
 {
     static void DoTopologicalSort( GraphNode current, List<GraphNode> nodes, ref Dictionary<int, bool> visited, ref List<GraphNode> topological )
     {
