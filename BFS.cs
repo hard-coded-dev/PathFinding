@@ -1,19 +1,22 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace PathFinding
 {
-    public class Dijkstra
+    public class BFS
     {
-        public List<Direction4Way> SearchGraphByDijkstra( Node start, PathGrid grid, out int cost )
+        public static List<Direction4Way> Search4WayNode( Node start, IReachable searchGrid, IMovable moveGrid, out int distance )
         {
-            cost = -1;
+            Console.Error.WriteLine( "Finding from {0} by BFS", start );
+            distance = -1;
 
             List<Direction4Way> pathWay = new List<Direction4Way>();
-            if( grid.IsReachedDestination( start ) )
+            if( searchGrid.IsReachedDestination( start ) )
             {
-                cost = 0;
+                distance = 0;
                 return pathWay;
             }
 
@@ -30,13 +33,15 @@ namespace PathFinding
                 frontier.RemoveAt( 0 );
                 explored.Add( current );
 
-                if( grid.IsReachedDestination( current.Pos ) )
+                if( searchGrid.IsReachedDestination( current.Pos ) )
                 {
-                    cost = current.CostSoFar + current.CostToEnd;
+                    Console.Error.WriteLine( "End node found : {0}", current.Pos );
+                    distance = current.CostSoFar + current.CostToEnd;
                     SearchNode parent = current;
                     while( parent != null && parent.Pos.Equals( start ) == false )
                     {
-                        Direction4Way dir = PathFinding.Get4WayDirection( parent.Parent.Pos as Node, parent.Pos as Node );
+                        Direction4Way dir = PathFinding.Get4WayDirection( parent.Parent.Pos, parent.Pos );
+                        //Console.Error.WriteLine( "iterate back to parent {0}", parent.Pos );
                         pathWay.Add( dir );
                         parent = parent.Parent;
                     }
@@ -44,41 +49,28 @@ namespace PathFinding
                     break;
                 }
 
-                List<SearchNode> neighbors = PathFinding.Get4WayNeighbors( current, grid );
+                List<SearchNode> neighbors = PathFinding.Get4WayNeighbors( current, moveGrid );
                 foreach( SearchNode node in neighbors )
                 {
                     if( explored.Contains( node ) )
                         continue;
 
                     node.CostSoFar = current.CostSoFar + 1;
-                    node.CostToEnd = 0;
 
                     int index = frontier.IndexOf( node );
-                    if( index > 0 )
-                    {
-                        if( node.CostSoFar < frontier[index].CostSoFar )
-                        {
-                            // if found better way
-                            frontier[index].Parent = current;
-                            frontier[index].CostSoFar = node.CostSoFar;
-                            frontier[index].CostToEnd = node.CostToEnd;
-                        }
-                    }
-                    else
+                    if( index == -1 )
                     {
                         frontier.Add( node );
                     }
                 }
-                frontier.Sort( ( item1, item2 ) => ( item1.CostSoFar + item1.CostToEnd ) - ( item2.CostSoFar + item2.CostToEnd ) );
                 //Console.Error.WriteLine( "frontier = {0}", frontier.ToDebugString() );
             }
 
             pathWay.Reverse();
-
             if( found )
-                Console.Error.WriteLine( "Found from {0} : {1} of distance {2}", start, pathWay.ToDebugString(), cost );
+                Console.Error.WriteLine( "Found : from {0} through {1} of distance {2}", start, pathWay.ToDebugString(), distance );
             else
-                Console.Error.WriteLine( "No Way! from {0}", start );
+                Console.Error.WriteLine( "No Way! Found from {0}", start );
             return pathWay;
         }
     }

@@ -1,26 +1,29 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace PathFinding
 {
-    public class Dijkstra
+    public class AStar
     {
-        public List<Direction4Way> SearchGraphByDijkstra( Node start, PathGrid grid, out int cost )
+        public static List<Direction4Way> Search4WayNode( Node start, Node end, IMovable grid, out int distance )
         {
-            cost = -1;
+            Console.Error.WriteLine( "Finding from {0} to {1} by A*", start, end );
+            distance = -1;
 
             List<Direction4Way> pathWay = new List<Direction4Way>();
-            if( grid.IsReachedDestination( start ) )
+            if( start.Equals( end ) )
             {
-                cost = 0;
+                distance = 0;
                 return pathWay;
             }
 
             List<SearchNode> frontier = new List<SearchNode>();
             List<SearchNode> explored = new List<SearchNode>();
 
-            SearchNode startNode = new SearchNode( start, null, 0, 0 );
+            SearchNode startNode = new SearchNode( start, null, 0, PathFinding.GetManhattanHeuristic( start, end ) );
             frontier.Add( startNode );
 
             bool found = false;
@@ -30,13 +33,13 @@ namespace PathFinding
                 frontier.RemoveAt( 0 );
                 explored.Add( current );
 
-                if( grid.IsReachedDestination( current.Pos ) )
+                if( current.Pos.Equals( end ) )
                 {
-                    cost = current.CostSoFar + current.CostToEnd;
+                    distance = current.CostSoFar + current.CostToEnd;
                     SearchNode parent = current;
                     while( parent != null && parent.Pos.Equals( start ) == false )
                     {
-                        Direction4Way dir = PathFinding.Get4WayDirection( parent.Parent.Pos as Node, parent.Pos as Node );
+                        Direction4Way dir = PathFinding.Get4WayDirection( parent.Parent.Pos, parent.Pos );
                         pathWay.Add( dir );
                         parent = parent.Parent;
                     }
@@ -51,7 +54,7 @@ namespace PathFinding
                         continue;
 
                     node.CostSoFar = current.CostSoFar + 1;
-                    node.CostToEnd = 0;
+                    node.CostToEnd = PathFinding.GetManhattanHeuristic( node.Pos, end );
 
                     int index = frontier.IndexOf( node );
                     if( index > 0 )
@@ -76,9 +79,9 @@ namespace PathFinding
             pathWay.Reverse();
 
             if( found )
-                Console.Error.WriteLine( "Found from {0} : {1} of distance {2}", start, pathWay.ToDebugString(), cost );
+                Console.Error.WriteLine( "Found : {0} to {1} : {2} of distance {3}", start, end, pathWay.ToDebugString(), distance );
             else
-                Console.Error.WriteLine( "No Way! from {0}", start );
+                Console.Error.WriteLine( "No Way! : {0} to {1}", start, end );
             return pathWay;
         }
     }

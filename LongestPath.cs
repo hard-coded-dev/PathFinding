@@ -2,115 +2,118 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public partial class PathFinding
+namespace PathFinding
 {
-    static void DoTopologicalSort( GraphNode current, List<GraphNode> nodes, ref Dictionary<int, bool> visited, ref List<GraphNode> topological )
+    public partial class PathFinding
     {
-        visited[current.Id] = true;
-        
-        IEnumerable<GraphNode> neighbors = nodes.Where( Item => Item.Id == current.NextId1 || Item.Id == current.NextId2 );
-        foreach( GraphNode neighbor in neighbors )
+        static void DoTopologicalSort( GraphNode current, List<GraphNode> nodes, ref Dictionary<int, bool> visited, ref List<GraphNode> topological )
         {
-            if( visited.ContainsKey( neighbor.Id ) == false )
+            visited[current.Id] = true;
+
+            IEnumerable<GraphNode> neighbors = nodes.Where( Item => Item.Id == current.NextId1 || Item.Id == current.NextId2 );
+            foreach( GraphNode neighbor in neighbors )
             {
-                DoTopologicalSort( neighbor, nodes, ref visited, ref topological );
+                if( visited.ContainsKey( neighbor.Id ) == false )
+                {
+                    DoTopologicalSort( neighbor, nodes, ref visited, ref topological );
+                }
             }
+            topological.Add( current );
         }
-        topological.Add( current );
-    }
-    
-    static List<GraphNode> TopologicalSort( List<GraphNode> nodes )
-    {
-        List<GraphNode> topological = new List<GraphNode>();
-        Dictionary<int, bool> visited = new Dictionary<int, bool>();
-        
-        DoTopologicalSort( nodes[0], nodes, ref visited, ref topological );
-        topological.Reverse();
-        
-        //Console.Error.WriteLine( "Topological Order is {0}", topological.ToDebugString() );
-        
-        return topological;
-    }
-    
-	// find max or longest path distance(cost) from stat to ends( can be multiple )
-    public static int FindLongestPath( GraphNode start, Dictionary<int, GraphNode> ends, Dictionary<int, GraphNode> nodes )
-    {
-        List<GraphNode> topologicalOrder = TopologicalSort( nodes.Values.ToList() );
-        
-        Dictionary<int, int> distance = new Dictionary<int, int>();
-        foreach( GraphNode node in topologicalOrder )
+
+        static List<GraphNode> TopologicalSort( List<GraphNode> nodes )
         {
-            distance[node.Id] = -Int32.MaxValue;
+            List<GraphNode> topological = new List<GraphNode>();
+            Dictionary<int, bool> visited = new Dictionary<int, bool>();
+
+            DoTopologicalSort( nodes[0], nodes, ref visited, ref topological );
+            topological.Reverse();
+
+            //Console.Error.WriteLine( "Topological Order is {0}", topological.ToDebugString() );
+
+            return topological;
         }
-        distance[start.Id] = start.Cost;
-    
-        while( topologicalOrder.Count > 0 )
+
+        // find max or longest path distance(cost) from stat to ends( can be multiple )
+        public static int FindLongestPath( GraphNode start, Dictionary<int, GraphNode> ends, Dictionary<int, GraphNode> nodes )
         {
-            GraphNode current = topologicalOrder[0];
-            topologicalOrder.RemoveAt(0);
-     
-            // Update distances of all adjacent nodes
-            if( distance[current.Id] != -Int32.MaxValue )
+            List<GraphNode> topologicalOrder = TopologicalSort( nodes.Values.ToList() );
+
+            Dictionary<int, int> distance = new Dictionary<int, int>();
+            foreach( GraphNode node in topologicalOrder )
             {
-                if( current.NextId1 != -1 )
-                {
-                    GraphNode neighbor1 = nodes[current.NextId1];
-                    if( distance[neighbor1.Id] < distance[current.Id] + neighbor1.Cost )
-                    {
-                        distance[neighbor1.Id] = distance[current.Id] + neighbor1.Cost;
-                    }
-                }
-                if( current.NextId2 != -1 )
-                {
-                    GraphNode neighbor2 = nodes[current.NextId2];
-                    if( distance[neighbor2.Id] < distance[current.Id] + neighbor2.Cost )
-                    {
-                        distance[neighbor2.Id] = distance[current.Id] + neighbor2.Cost;
-                    }
-                }
-                
-                /*
-                IEnumerable<GraphNode> neighbors = nodes.Where( Item => Item.Id == current.NextId1 || Item.Id == current.NextId2 );
-                foreach( GraphNode neighbor in neighbors )
-                {
-                    if( distance[neighbor.Id] < distance[current.Id] + neighbor.Cost )
-                    {
-                        distance[neighbor.Id] = distance[current.Id] + neighbor.Cost;
-                        //Console.Error.WriteLine( "update current of {0} to {1}", neighbor.Id, distance[neighbor.Id] );
-                    }
-                }
-                */
+                distance[node.Id] = -Int32.MaxValue;
             }
-        }
-        
-        int maxDistance = start.Cost;
-        
-        foreach( var kvp in distance )
-        {
-            //Console.Error.WriteLine( "max distance to {0} is {1}", kvp.Key, kvp.Value );
-            if( ends.ContainsKey( kvp.Key ) )
+            distance[start.Id] = start.Cost;
+
+            while( topologicalOrder.Count > 0 )
             {
-                if( kvp.Value > maxDistance )
+                GraphNode current = topologicalOrder[0];
+                topologicalOrder.RemoveAt( 0 );
+
+                // Update distances of all adjacent nodes
+                if( distance[current.Id] != -Int32.MaxValue )
                 {
-                    maxDistance = kvp.Value;
+                    if( current.NextId1 != -1 )
+                    {
+                        GraphNode neighbor1 = nodes[current.NextId1];
+                        if( distance[neighbor1.Id] < distance[current.Id] + neighbor1.Cost )
+                        {
+                            distance[neighbor1.Id] = distance[current.Id] + neighbor1.Cost;
+                        }
+                    }
+                    if( current.NextId2 != -1 )
+                    {
+                        GraphNode neighbor2 = nodes[current.NextId2];
+                        if( distance[neighbor2.Id] < distance[current.Id] + neighbor2.Cost )
+                        {
+                            distance[neighbor2.Id] = distance[current.Id] + neighbor2.Cost;
+                        }
+                    }
+
+                    /*
+                    IEnumerable<GraphNode> neighbors = nodes.Where( Item => Item.Id == current.NextId1 || Item.Id == current.NextId2 );
+                    foreach( GraphNode neighbor in neighbors )
+                    {
+                        if( distance[neighbor.Id] < distance[current.Id] + neighbor.Cost )
+                        {
+                            distance[neighbor.Id] = distance[current.Id] + neighbor.Cost;
+                            //Console.Error.WriteLine( "update current of {0} to {1}", neighbor.Id, distance[neighbor.Id] );
+                        }
+                    }
+                    */
                 }
             }
 
-            /*
-            foreach( GraphNode endNode in ends )
+            int maxDistance = start.Cost;
+
+            foreach( var kvp in distance )
             {
-                if( endNode.Id == kvp.Key )
+                //Console.Error.WriteLine( "max distance to {0} is {1}", kvp.Key, kvp.Value );
+                if( ends.ContainsKey( kvp.Key ) )
                 {
                     if( kvp.Value > maxDistance )
                     {
                         maxDistance = kvp.Value;
                     }
                 }
-            }
-            */
-        }
 
-        return maxDistance;
+                /*
+                foreach( GraphNode endNode in ends )
+                {
+                    if( endNode.Id == kvp.Key )
+                    {
+                        if( kvp.Value > maxDistance )
+                        {
+                            maxDistance = kvp.Value;
+                        }
+                    }
+                }
+                */
+            }
+
+            return maxDistance;
+        }
     }
+
 }
-    

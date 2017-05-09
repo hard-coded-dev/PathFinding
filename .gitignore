@@ -87,7 +87,7 @@ ipch/
 *.cachefile
 
 # Visual C# Property files
-Properties/
+
 
 # Visual Studio profiler
 *.psess

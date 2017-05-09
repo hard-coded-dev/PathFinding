@@ -40,18 +40,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AStar.cs" />
+    <Compile Include="BFS.cs" />
     <Compile Include="DebugHelper.cs" />
     <Compile Include="Dijkstra.cs" />
     <Compile Include="HexagonalGrid.cs" />
     <Compile Include="LongestPath.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="PathFinding.cs" />
-    <Compile Include="PathFinding4Way.cs" />
-    <None Include="PathFindingHexagonal.cs" />
+    <Compile Include="HexagonalPathFinding.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
+    <None Include="README.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
