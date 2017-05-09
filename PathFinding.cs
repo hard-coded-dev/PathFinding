@@ -33,11 +33,21 @@ namespace PathFinding
         LENGTH,
     }
 
+    public enum Direction8Way
+    {
+        UPPER_LEFT,
+        UP,
+        UPPER_RIGHT,
+        RIGHT,
+        DOWN_RIGHT,
+        DOWN,
+        DOWN_LEFT,
+        LEFT,
+        NO_WAY,
+    }
 
     public partial class PathFinding
     {
-        // based on Direction order
-        static int[,] Way4Directions = new int[,] { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } }; // { row, col }
 
         public static int GetManhattanHeuristic( Node start, Node end )
         {
@@ -64,6 +74,7 @@ namespace PathFinding
             }
         }
 
+        static int[,] Way4Directions = new int[,] { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } }; // { row, col }
         public static List<SearchNode> Get4WayNeighbors( SearchNode current, IMovable grid )
         {
             List<SearchNode> neighbors = new List<SearchNode>();
@@ -134,5 +145,63 @@ namespace PathFinding
             return neighbors;
         }
 
+        // (0,0) : TopLeft, (M,N) : BottomLeft
+        public static Direction8Way Get8WayDirection( Node from, Node to )
+        {
+            int rowDiff = to.Row - from.Row;
+            int colDiff = to.Col - from.Col;
+
+            if( rowDiff > 0 )
+            {
+                if( colDiff > 0 )
+                    return Direction8Way.DOWN_RIGHT;
+                else if( colDiff < 0 )
+                    return Direction8Way.DOWN_LEFT;
+                else
+                    return Direction8Way.DOWN;
+            }
+            else if( rowDiff < 0 )
+            {
+                if( colDiff > 0 )
+                    return Direction8Way.UPPER_RIGHT;
+                else if( colDiff < 0 )
+                    return Direction8Way.UPPER_LEFT;
+                else
+                    return Direction8Way.UP;
+            }
+            else
+            {
+                if( colDiff > 0 )
+                    return Direction8Way.RIGHT;
+                else if( colDiff < 0 )
+                    return Direction8Way.LEFT;
+                else
+                {
+                    Console.Error.WriteLine( "### ERROR(Get8WayDirection) ### : Cannot go that way, [{0}, {1}]", rowDiff, colDiff );
+                    return Direction8Way.NO_WAY;
+                }
+            }
+        }
+
+        // UPPER_LEFT, UP, UPPER_RIGHT, RIGHT, DOWN_RIGHT, DOWN, DOWN_LEFT, LEFT,
+        static int[,] Way8Directions = new int[,] { { -1, -1 }, { -1, 0 }, { -1, 1 }, { 0, 1 }, { 1, 1 }, { 1, 0 }, { 1, -1 }, { 0, -1 } }; // { row, col }
+        public static List<SearchNode> Get8WayNeighbors( SearchNode current, IMovable grid )
+        {
+            List<SearchNode> neighbors = new List<SearchNode>();
+
+            for( Direction8Way dir = ( Direction8Way )0; dir < Direction8Way.NO_WAY; dir += 1 )
+            {
+                Node newPos = new Node( current.Pos.Row + Way8Directions[( int )dir, 0], current.Pos.Col + Way8Directions[( int )dir, 1] );
+
+                // for specific constraints
+                if( grid != null && grid.IsMovableNode( newPos ) == false )
+                    continue;
+
+                SearchNode newNode = new SearchNode( newPos, current, 0, 0 );
+
+                neighbors.Add( newNode );
+            }
+            return neighbors;
+        }
     }
 }
